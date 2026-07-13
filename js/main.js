@@ -128,6 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
     workspacePathInput.value = savedPath;
     scanWorkspace();
   }
+  
+  // Check for updates shortly after boot
+  setTimeout(checkForUpdates, 2000);
 });
 
 // Event Listeners
@@ -430,9 +433,24 @@ async function chooseWorkspaceDirectory() {
       log('Selección de carpeta cancelada.', 'warning');
     }
   } catch (err) {
-    log(`Error al abrir selector Finder: ${err.message}`, 'error');
+    log(`Error al abrir selector de carpeta: ${err.message}`, 'error');
   } finally {
     chooseDirBtn.disabled = false;
+  }
+}
+
+// REST Client: Check for Updates via GitHub API
+async function checkForUpdates() {
+  try {
+    const res = await fetch('/api/check-update');
+    const data = await res.json();
+    if (data.update_available && data.url) {
+      showToast(`¡Nueva actualización disponible (${data.latest_version})! Revise GitHub.`, 'info');
+      // Podríamos agregar un botón en la UI, pero el toast alerta al usuario.
+      log(`Hay una nueva versión de FreePTX disponible: ${data.latest_version}. Descárgala desde: ${data.url}`, 'success');
+    }
+  } catch (err) {
+    console.log("Update check failed:", err);
   }
 }
 
@@ -514,6 +532,12 @@ async function scanWorkspace() {
     // Auto-reload scan if background conforming is active to fetch compiled files
     if (resamplingCount > 0) {
       setTimeout(scanWorkspace, 4000);
+    }
+    
+    // Fix Wizard lock: Ensure next button is enabled and state refreshed
+    if (viewMode === 'wizard') {
+      nextStepBtn.disabled = false;
+      goToStep(currentStep); // Re-trigger step logic to unlock visually
     }
     
   } catch (err) {

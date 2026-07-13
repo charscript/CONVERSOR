@@ -3,9 +3,12 @@ import socketserver
 import json
 import os
 import urllib.parse
+import urllib.request
 import threading
 import re
 import subprocess
+import tkinter as tk
+from tkinter import filedialog
 try:
     import webview
 except ImportError:
@@ -31,17 +34,20 @@ from core.midi import (
 
 PORT = 8000
 
-def choose_directory_mac():
+def choose_directory_crossplatform():
     """
-    Spawns a native macOS Finder folder selector dialog via AppleScript.
+    Spawns a native OS folder selector dialog.
+    Uses tkinter which is completely cross-platform.
     """
     try:
-        cmd = ["osascript", "-e", 'POSIX path of (choose folder with prompt "Selecciona la carpeta de tu sesión de audio:")']
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=60)
-        if result.returncode == 0:
-            return result.stdout.strip()
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)
+        path = filedialog.askdirectory(title="Selecciona la carpeta de tu sesión de audio:")
+        root.destroy()
+        return path if path else None
     except Exception as e:
-        print("Error displaying Finder folder prompt:", str(e))
+        print("Error displaying folder prompt:", str(e))
     return None
 
 class DAWSyncHandler(http.server.SimpleHTTPRequestHandler):
@@ -73,11 +79,34 @@ class DAWSyncHandler(http.server.SimpleHTTPRequestHandler):
             return
             
         elif parsed_url.path == '/api/choose-directory':
-            path = choose_directory_mac()
+            path = choose_directory_crossplatform()
             if path:
                 self.send_json({"path": path})
             else:
                 self.send_json({"path": ""})
+            return
+            
+        elif parsed_url.path == '/api/check-update':
+            try:
+                # Consultar la API de GitHub para obtener el release más reciente
+                req = urllib.request.Request("https://api.github.com/repos/charscript/CONVERSOR/releases/latest")
+                req.add_header('User-Agent', 'FreePTX-Updater')
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    data = json.loads(response.read().decode())
+                    latest_tag = data.get("tag_name", "")
+                    # Current version hardcoded for comparison
+                    current_version = "v2.1.0"
+                    
+                    if latest_tag and latest_tag != current_version:
+                        self.send_json({
+                            "update_available": True,
+                            "latest_version": latest_tag,
+                            "url": data.get("html_url")
+                        })
+                    else:
+                        self.send_json({"update_available": False})
+            except Exception as e:
+                self.send_json({"update_available": False, "error": str(e)})
             return
             
         elif parsed_url.path == '/api/generate-midi':

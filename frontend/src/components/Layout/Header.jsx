@@ -1,13 +1,18 @@
+import { useAppStore } from '../../store/useAppStore';
 import { useState, useEffect } from 'react';
 import { Bug, Download } from 'lucide-react';
 
 export default function Header() {
+  const setAppVersion = useAppStore(state => state.setAppVersion);
   const [updateInfo, setUpdateInfo] = useState({ update_available: false, url: '' });
 
   useEffect(() => {
     fetch('/api/check-update')
       .then(r => r.json())
       .then(data => {
+        if (data.current_version) {
+          setAppVersion(data.current_version);
+        }
         if (data.update_available && data.url) {
           setUpdateInfo(data);
         }

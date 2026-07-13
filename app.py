@@ -45,6 +45,7 @@ def get_free_port(starting_port=8000):
     return starting_port
 
 PORT = get_free_port(8000)
+APP_VERSION = "v2.2.0"
 
 def choose_directory_crossplatform():
     """
@@ -175,19 +176,18 @@ class DAWSyncHandler(http.server.SimpleHTTPRequestHandler):
             with urllib.request.urlopen(req, timeout=5) as response:
                 data = json.loads(response.read().decode())
                 latest_tag = data.get("tag_name", "")
-                # Current version hardcoded for comparison
-                current_version = "v2.1.0"
 
-                if latest_tag and latest_tag != current_version:
+                if latest_tag and latest_tag != APP_VERSION:
                     self.send_json({
                         "update_available": True,
+                        "current_version": APP_VERSION,
                         "latest_version": latest_tag,
                         "url": data.get("html_url")
                     })
                 else:
-                    self.send_json({"update_available": False})
+                    self.send_json({"update_available": False, "current_version": APP_VERSION})
         except Exception as e:
-            self.send_json({"update_available": False, "error": str(e)})
+            self.send_json({"update_available": False, "current_version": APP_VERSION, "error": str(e)})
 
     def _handle_generate_midi_get(self, parsed_url, query_params):
         workspace_path = query_params.get('path', [''])[0]

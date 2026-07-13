@@ -7,6 +7,7 @@ export default function Step2Diagnosis() {
   const wavFiles = useAppStore(state => state.wavFiles);
   const workspacePath = useAppStore(state => state.workspacePath);
   const config = useAppStore(state => state.config);
+  const scanWorkspace = useAppStore(state => state.scanWorkspace);
   
   const [track1, setTrack1] = useState('');
   const [track2, setTrack2] = useState('');
@@ -36,7 +37,7 @@ export default function Step2Diagnosis() {
     setIsResampling(true);
     try {
       await api.resampleBatch(workspacePath);
-      // Ideally we would trigger a re-scan here
+      await scanWorkspace();
     } catch (err) {
       console.error("Resample failed", err);
     } finally {

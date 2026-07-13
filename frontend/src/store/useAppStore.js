@@ -26,8 +26,10 @@ export const useAppStore = create((set, get) => ({
   currentStep: 1,
   isLoading: false,
   error: null,
+  appVersion: '',
   
   // Actions
+  setAppVersion: (version) => set({ appVersion: version }),
   setWorkspacePath: (path) => set({ workspacePath: path }),
   setConfig: (config) => set((state) => ({ config: { ...state.config, ...config } })),
   setScanResults: (data) => set({

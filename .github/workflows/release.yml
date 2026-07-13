@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # Trigger on any tag starting with "v" (e.g., v2.2.0)
 
+permissions:
+  contents: write
+
 jobs:
   build-mac:
     name: Build macOS App

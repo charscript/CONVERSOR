@@ -114,7 +114,7 @@ export default function Step3Alignment() {
           <span className="text-muted text-[13px] font-display">0.00s</span>
         </div>
         <div className="h-[90px] bg-black/50 border border-white/10 rounded mb-3 overflow-hidden">
-          <WaveformCanvas workspacePath={workspacePath} filename={selectedWav} />
+          <WaveformCanvas workspacePath={workspacePath} filename={selectedWav} audioEl={audioEl} isPlaying={isPlaying} />
         </div>
         <div className="flex items-center gap-3 text-[12px]">
           <span className="min-w-[90px] text-muted">Desfase Manual:</span>

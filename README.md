@@ -1,48 +1,43 @@
 # FreePTX - Professional DAW Interoperability
 
-**FreePTX** (antes conocido como "La Máquina de PETEX") es una herramienta profesional avanzada que permite la interoperabilidad de sesiones de audio entre distintos DAWs (Digital Audio Workstations), como **Pro Tools** y **FL Studio**. Su núcleo tecnológico está impulsado por un motor inteligente que alinea stems de audio mediante análisis de picos y correlación de fase, importando marcadores, tempo y firmas rítmicas de forma automática.
+**FreePTX** (antes conocido como "La Máquina de PETEX") es una plataforma profesional avanzada diseñada para la interoperabilidad bidireccional entre distintos DAWs (Digital Audio Workstations), como **Pro Tools** y **FL Studio**. 
 
-## Características Principales
-
-*   **Asistente Inteligente (Wizard)**: Interfaz fluida, paso a paso, para guiar a los usuarios en la importación de sesiones.
-*   **Alineación Automática**: Detección de picos, normalización y alineación por fases de los Stems importados.
-*   **Traducción de Metadatos**: Extrae y traduce información de archivos de sesión (Pro Tools `.txt` y FL Studio `.flp`) a archivos MIDI universales listos para arrastrar y soltar.
-*   **Conversión Continua**: Resampling de audio inteligente y automático.
-*   **Flujo Experto**: Para usuarios avanzados, todos los paneles están expuestos en una vista Dashboard unificada y un mezclador de pre-escucha.
+Su núcleo tecnológico está impulsado por un motor inteligente de procesamiento de señales en Python que alinea stems de audio mediante correlación de fase, traduce metadatos matemáticamente y **conforma sesiones automáticamente de forma remota** utilizando el SDK de Pro Tools (PTSL / gRPC).
 
 ---
 
-## 🚀 Uso Inmediato (Para Usuarios Finales)
+## 🚀 El Ecosistema Autónomo (v2.2.0+)
 
-Para ejecutar FreePTX, no necesitas tocar código. Hemos preparado ejecutables rápidos según tu sistema operativo.
+FreePTX no es solo un programa de escritorio, es un ecosistema interconectado con mantenimiento automatizado:
 
-**Requisito previo:** Debes tener [Python 3](https://www.python.org/downloads/) instalado en tu equipo. *(¡Recuerda marcar "Add Python to PATH" durante la instalación!)*
-
-### En Windows
-1. Descarga el repositorio o haz un clon (`git clone`).
-2. Dale doble clic al archivo `Iniciar_FreePTX_Windows.bat`.
-3. ¡Listo! Se abrirá automáticamente la aplicación web en tu navegador predeterminado.
-
-### En Mac / Linux
-1. Abre tu terminal.
-2. Dale permisos de ejecución al launcher: `chmod +x Iniciar_FreePTX_Mac.command`
-3. Ejecútalo dando doble clic, o ejecutando `./Iniciar_FreePTX_Mac.command` en la consola.
+1. **La Aplicación Nativa (PyWebView)**: El Frontend ha evolucionado a una poderosa *Single Page Application (SPA)* construida en React, que interactúa con el sistema operativo sin bloqueos del navegador mediante una arquitectura Multiproceso Local en Python. 
+2. **Web Inteligente y Distribución Cloud**: La página de descarga (Landing Page) se comunica directamente con la API de GitHub. Los usuarios siempre descargan la última versión disponible sin que el administrador tenga que editar el código de la web.
+3. **CI/CD Integrado (GitHub Actions)**: La compilación de los binarios para Mac (`.app`) y Windows (`.exe`) ocurre de forma desatendida en la nube. ¡Los programadores solo escriben código!
 
 ---
 
-## 🛠 Compilación para Producción (Para Desarrolladores)
+## 💻 Características Principales
 
-Si deseas empaquetar FreePTX en un único ejecutable (**.exe**) totalmente independiente, de modo que el cliente final no requiera instalar Python, utiliza nuestro script de compilación incluido.
+*   **Asistente Inteligente (Wizard)**: Interfaz React fluida que guía al usuario en la importación de sesiones.
+*   **Alineación Automática**: Detección de picos, normalización y alineación por fases de Stems importados.
+*   **Traducción de Metadatos**: Extrae información de archivos `.txt` de Pro Tools y `.flp` de FL Studio hacia MIDI Universal.
+*   **Control Remoto de Pro Tools (PTSL)**: FreePTX se comunica con el servidor interno de Pro Tools en el puerto 31416, importando audios y ajustando paneos/volúmenes de manera totalmente desatendida.
+*   **Auto-Actualizador**: El sistema verifica su propia versión e informa al usuario si hay un parche nuevo disponible.
 
-### Compilar a `.exe` (Windows)
-1. Dale doble clic a `Compilar_Windows_Exe.bat`.
-2. El script automáticamente instalará **PyInstaller**, y agrupará el servidor local, el analizador de archivos `.py` y todos los recursos del frontend (`.html`, `.css`, `.js`) de manera oculta.
-3. El resultado final lo encontrarás dentro de la carpeta `dist/FreePTX/FreePTX.exe`. 
-4. Simplemente comprime ese `.exe` en un `.zip` y distribúyelo a tus clientes o publícalo en la pestaña de **Releases** de GitHub. ¡Es totalmente autocontenido!
+---
 
-### ¿Cómo funciona la arquitectura?
-FreePTX es extremadamente robusto e independiente. No depende de grandes frameworks web como Node.js, React o bases de datos complejas. 
-- **Frontend**: Usa Vanilla HTML5, CSS3, y JavaScript moderno para renderizar una interfaz de usuario extremadamente fluida (glassmorphism).
-- **Backend / Motor**: Utiliza un módulo `http.server` nativo de Python para exponer las herramientas del core (`daw_sync.py`), las cuales procesan los archivos `wav` internamente usando librerías estándar. 
+## 🛠 Entorno para Desarrolladores
 
-*Gracias a esto, compilarlo con PyInstaller genera un artefacto rápido, eficiente y súper fácil de portar.*
+Ya no necesitas configurar engorrosos entornos virtuales para publicar actualizaciones. Hemos delegado el trabajo pesado a los robots.
+
+### ¿Cómo Publicar una Nueva Versión? (CI/CD Automático)
+1. Escribe tu nuevo código y realiza tu *Commit* habitual (`git commit -m "nuevas funciones"`).
+2. Crea una "Etiqueta" (Tag) especificando el número de la versión. **Asegúrate de que empiece con una "v"** (ejemplo: `v2.2.0`). Puedes hacer esto desde tu terminal con `git tag v2.2.0` o desde la pestaña "History" en GitHub Desktop.
+3. Envía los cambios (`git push origin main --tags`).
+
+**¡Eso es todo!** Automáticamente, nuestros servidores en GitHub Actions iniciarán un *Workflow*. Descargarán las dependencias, compilarán el `.exe` para Windows y la aplicación `.app` para macOS, crearán el "Release" en tu repositorio y subirán los archivos. Acto seguido, la Landing Page y la App reconocerán inmediatamente la nueva actualización.
+
+### Compilación Local Manual (Opcional)
+Si deseas compilar la aplicación para realizar pruebas en tu equipo sin subirla a internet:
+- **Windows**: Ejecuta `Compilar_Windows_Exe.bat`. Requerirá tener Python instalado. Se creará un entorno independiente usando PyInstaller en la carpeta `/dist/`.
+- **macOS**: Ejecuta `./Compilar_Mac_App.sh`. El script automáticamente ensamblará un paquete nativo `.app` inyectando el `.icns` del logotipo corporativo.

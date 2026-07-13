@@ -33,9 +33,15 @@ jobs:
           cd dist
           zip -r FreePTX_Mac.zip FreePTX.app
 
+      - name: Extract Release Notes
+        run: |
+          python -c "import re; content=open('CHANGELOG.md','r',encoding='utf-8').read(); m=re.search(r'(##\s*v[\d\.]+.*?)(?=\n##\s*v[\d\.]+|\Z)', content, re.DOTALL); open('release_notes.txt','w',encoding='utf-8').write(m.group(1)) if m else None"
+
       - name: Upload Mac Asset
         uses: softprops/action-gh-release@v1
         with:
+          name: Release ${{ github.ref_name }}
+          body_path: release_notes.txt
           files: dist/FreePTX_Mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -65,9 +71,15 @@ jobs:
         run: |
           Compress-Archive -Path dist\FreePTX\* -DestinationPath dist\FreePTX_Windows.zip
 
+      - name: Extract Release Notes
+        run: |
+          python -c "import re; content=open('CHANGELOG.md','r',encoding='utf-8').read(); m=re.search(r'(##\s*v[\d\.]+.*?)(?=\n##\s*v[\d\.]+|\Z)', content, re.DOTALL); open('release_notes.txt','w',encoding='utf-8').write(m.group(1)) if m else None"
+
       - name: Upload Windows Asset
         uses: softprops/action-gh-release@v1
         with:
+          name: Release ${{ github.ref_name }}
+          body_path: release_notes.txt
           files: dist/FreePTX_Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

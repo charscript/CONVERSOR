@@ -1,6 +1,53 @@
+import { useState } from 'react';
 import { Download, Play, Save } from 'lucide-react';
+import { useAppStore } from '../../store/useAppStore';
+import { api } from '../../api/client';
 
 export default function Step5Export() {
+  const config = useAppStore(state => state.config);
+  const workspacePath = useAppStore(state => state.workspacePath);
+  const ptsl = useAppStore(state => state.ptsl);
+  
+  const [isGeneratingMidi, setIsGeneratingMidi] = useState(false);
+  const [isBuildingPT, setIsBuildingPT] = useState(false);
+  const [isExportingReaper, setIsExportingReaper] = useState(false);
+  
+  const handleGenerateMidi = async () => {
+    if (!workspacePath) return;
+    setIsGeneratingMidi(true);
+    try {
+      await api.generateMidi(workspacePath);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingMidi(false);
+    }
+  };
+  
+  const handleBuildPT = async () => {
+    if (!workspacePath) return;
+    setIsBuildingPT(true);
+    try {
+      await api.buildPtSession(workspacePath, config);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBuildingPT(false);
+    }
+  };
+  
+  const handleExportReaper = async () => {
+    if (!workspacePath) return;
+    setIsExportingReaper(true);
+    try {
+      await api.exportReaper(workspacePath, config);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsExportingReaper(false);
+    }
+  };
+
   return (
     <div className="glass-panel">
       <div className="bg-black/20 -mx-6 -mt-6 mb-5 px-6 py-3 border-b border-white/5 rounded-t-[10px]">
@@ -22,7 +69,11 @@ export default function Step5Export() {
           <div className="flex justify-between items-center w-full mb-3 border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
               <span className="bg-[#ff0099] text-white text-[11px] font-bold px-2 py-0.5 rounded-[4px] tracking-wider">Pro Tools</span>
-              <span className="text-[#ff5f57] border border-[#ff5f57] bg-[#ff5f57]/10 text-[9px] font-bold px-[5px] py-0.5 rounded-[3px] tracking-wide" title="Conexión en Vivo Pro Tools Scripting SDK (PTSL)">PTSL Desconectado</span>
+              {ptsl && ptsl.connected ? (
+                <span className="text-[#00ff66] border border-[#00ff66] bg-[#00ff66]/10 text-[9px] font-bold px-[5px] py-0.5 rounded-[3px] tracking-wide">PTSL Conectado</span>
+              ) : (
+                <span className="text-[#ff5f57] border border-[#ff5f57] bg-[#ff5f57]/10 text-[9px] font-bold px-[5px] py-0.5 rounded-[3px] tracking-wide" title="Conexión en Vivo Pro Tools Scripting SDK (PTSL)">PTSL Desconectado</span>
+              )}
             </div>
             <h3 className="text-[14px] font-medium m-0 text-white">Importar/Conformar</h3>
           </div>
@@ -32,17 +83,23 @@ export default function Step5Export() {
           </p>
           
           <div className="mb-4 text-[13px] text-muted flex-grow">
-            Sin datos detectados de Pro Tools.
+            {config.markers.length > 0 ? `${config.markers.length} marcadores listos para conformar.` : 'Sin datos detectados de Pro Tools.'}
           </div>
           
           <div className="flex flex-col gap-2 w-full mt-auto">
-            <button className="btn-primary w-full justify-center" disabled>
+            <button 
+              onClick={handleGenerateMidi}
+              disabled={!workspacePath || isGeneratingMidi}
+              className="btn-primary w-full justify-center">
               <Download size={16} />
-              Generar MIDI de Tempo & Marcadores
+              {isGeneratingMidi ? 'Generando...' : 'Generar MIDI de Tempo & Marcadores'}
             </button>
-            <button className="btn-secondary w-full justify-center text-[#00ff66] border-[#00ff66]/20 bg-[#00ff66]/5" disabled>
+            <button 
+              onClick={handleBuildPT}
+              disabled={!workspacePath || isBuildingPT || (!ptsl || !ptsl.connected)}
+              className="btn-secondary w-full justify-center text-[#00ff66] border-[#00ff66]/20 bg-[#00ff66]/5 hover:bg-[#00ff66]/20">
               <Play size={16} />
-              Construir Sesión en Pro Tools (Live)
+              {isBuildingPT ? 'Construyendo...' : 'Construir Sesión en Pro Tools (Live)'}
             </button>
           </div>
         </div>
@@ -67,9 +124,12 @@ export default function Step5Export() {
           </div>
           
           <div className="flex flex-col gap-2 w-full mt-auto">
-            <button className="btn-secondary w-full justify-center" disabled>
+            <button 
+              onClick={handleExportReaper}
+              disabled={!workspacePath || isExportingReaper}
+              className="btn-secondary w-full justify-center">
               <Save size={16} />
-              Exportar Sesión a Reaper (.RPP)
+              {isExportingReaper ? 'Exportando...' : 'Exportar Sesión a Reaper (.RPP)'}
             </button>
             <button className="btn-secondary w-full justify-center" disabled>
               Sincronizar Datos desde FLP

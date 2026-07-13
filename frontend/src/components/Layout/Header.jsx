@@ -1,10 +1,7 @@
-import { useAppStore } from '../../store/useAppStore';
 import { useState, useEffect } from 'react';
 import { Bug, Download } from 'lucide-react';
 
 export default function Header() {
-  const viewMode = useAppStore(state => state.viewMode);
-  const setViewMode = useAppStore(state => state.setViewMode);
   const [updateInfo, setUpdateInfo] = useState({ update_available: false, url: '' });
 
   useEffect(() => {
@@ -52,20 +49,6 @@ export default function Header() {
           Reportar Bug
         </a>
 
-        <div className="h-6 w-px bg-white/10"></div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] text-muted font-semibold whitespace-nowrap">Vista Experta</span>
-          <label className="relative inline-block w-[44px] h-[22px]">
-            <input 
-              type="checkbox" 
-              className="opacity-0 w-0 h-0 peer"
-              checked={viewMode === 'expert'}
-              onChange={(e) => setViewMode(e.target.checked ? 'expert' : 'wizard')}
-            />
-            <span className="absolute cursor-pointer inset-0 bg-white/5 border border-white/5 rounded-[22px] transition-all duration-300 peer-checked:bg-fire/10 peer-checked:border-fire/35 before:absolute before:content-[''] before:h-[14px] before:w-[14px] before:left-[3px] before:bottom-[3px] before:bg-muted before:rounded-full before:transition-all before:duration-300 peer-checked:before:translate-x-[22px] peer-checked:before:bg-fire peer-checked:before:shadow-[0_0_10px_rgba(255,45,45,0.5),0_0_20px_rgba(255,106,0,0.2)]"></span>
-          </label>
-        </div>
       </div>
     </header>
   );

@@ -99,45 +99,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const changelogContent = document.getElementById('changelog-content');
-            if (changelogContent && bodyText) {
-                // Simple markdown parser for the release body
-                let htmlBody = bodyText
-                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                    .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-                    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-                    .replace(/\*(.*)\*/gim, '<em>$1</em>')
-                    .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
-                    .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-                    .replace(/\n$/gim, '<br />');
+            if (changelogContent) {
+                if (bodyText) {
+                    // Simple markdown parser for the release body
+                    let htmlBody = bodyText
+                        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                        .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+                        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                        .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                        .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
+                        .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
+                        .replace(/\n$/gim, '<br />');
 
-                // Wrap list items in ul
-                htmlBody = htmlBody.replace(/^\s*\-\s(.*)$/gim, '<li>$1</li>');
-                htmlBody = htmlBody.replace(/(<li>[\s\S]*?<\/li>)/, '<ul>$1</ul>');
+                    // Wrap list items in ul
+                    htmlBody = htmlBody.replace(/^\s*\-\s(.*)$/gim, '<li>$1</li>');
+                    htmlBody = htmlBody.replace(/(<li>[\s\S]*?<\/li>)/, '<ul>$1</ul>');
 
-                changelogContent.innerHTML = htmlBody;
+                    changelogContent.innerHTML = htmlBody;
+                } else {
+                    const isEs = document.body.classList.contains('lang-es');
+                    changelogContent.innerHTML = isEs ? '<p>No hay notas disponibles para esta versión.</p>' : '<p>No release notes available.</p>';
+                }
             }
 
             // 3. Update Download Links
             const btnWin = document.getElementById('btn-win-download');
             const btnMac = document.getElementById('btn-mac-download');
 
-            assets.forEach(asset => {
-                const name = asset.name.toLowerCase();
-                const url = asset.browser_download_url;
-                if (name.endsWith('.exe') && btnWin) {
-                    btnWin.href = url;
-                } else if ((name.endsWith('.command') || name.endsWith('.zip') || name.endsWith('.dmg')) && btnMac) {
-                    btnMac.href = url;
-                }
-            });
+            if (assets && assets.length > 0) {
+                assets.forEach(asset => {
+                    const name = asset.name.toLowerCase();
+                    const url = asset.browser_download_url;
+                    if (name.endsWith('.exe') && btnWin) {
+                        btnWin.href = url;
+                    } else if ((name.endsWith('.command') || name.endsWith('.zip') || name.endsWith('.dmg')) && btnMac) {
+                        btnMac.href = url;
+                    }
+                });
+            }
 
         } catch (error) {
             console.error('Error fetching GitHub release:', error);
             const changelogContent = document.getElementById('changelog-content');
             if (changelogContent) {
-                changelogContent.innerHTML = '<p>Error loading release notes.</p>';
+                const isEs = document.body.classList.contains('lang-es');
+                changelogContent.innerHTML = isEs 
+                    ? '<p style="color: #ff5f57;">Aún no hay lanzamientos públicos disponibles o ha ocurrido un error de conexión.</p>' 
+                    : '<p style="color: #ff5f57;">No public releases available yet or connection error.</p>';
             }
         }
     }

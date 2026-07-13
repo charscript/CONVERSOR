@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*' # Trigger on any tag starting with "v" (e.g., v2.2.0)
+      - '*.*.*' # Fallback for when the user forgets the 'v' (e.g., 2.3.1)
 
 permissions:
   contents: write
@@ -31,10 +32,20 @@ jobs:
           chmod +x Compilar_Mac_App.sh
           ./Compilar_Mac_App.sh
 
-      - name: Zip App Bundle
+      - name: Create DMG Disk Image
         run: |
+          brew install create-dmg
           cd dist
-          zip -r FreePTX_Mac.zip FreePTX.app
+          create-dmg \
+            --volname "FreePTX Installer" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "FreePTX.app" 150 190 \
+            --hide-extension "FreePTX.app" \
+            --app-drop-link 450 190 \
+            "FreePTX_Mac.dmg" \
+            "FreePTX.app"
 
       - name: Extract Release Notes
         run: |
@@ -45,7 +56,7 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           body_path: release_notes.txt
-          files: dist/FreePTX_Mac.zip
+          files: dist/FreePTX_Mac.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

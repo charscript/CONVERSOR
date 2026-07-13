@@ -22,7 +22,7 @@ echo.
 echo Compilando aplicacion (esto puede tardar unos segundos)...
 :: "--noconsole" oculta la terminal de fondo al correr el exe
 :: "--add-data" incluye los archivos web estaticos dentro del ejecutable
-pyinstaller --noconfirm --onedir --noconsole --name "FreePTX" --add-data "index.html;." --add-data "styles.css;." --add-data "js;js" --add-data "logo.png;." app.py
+pyinstaller --noconfirm --onedir --noconsole --name "FreePTX" --icon="icon.ico" --add-data "index.html;." --add-data "styles.css;." --add-data "js;js" --add-data "icon.png;." app.py
 
 echo.
 echo ========================================================

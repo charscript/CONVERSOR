@@ -1,6 +1,6 @@
 # FreePTX - Professional DAW Interoperability
 
-**FreePTX** (antes conocido como "La Máquina de PETEX") es una plataforma profesional de nivel corporativo diseñada para la interoperabilidad bidireccional entre distintos DAWs (Digital Audio Workstations), especializada en el flujo entre **Pro Tools** y **FL Studio**. 
+**FreePTX** es una plataforma profesional de nivel corporativo diseñada para la interoperabilidad bidireccional entre distintos DAWs (Digital Audio Workstations), especializada en el flujo entre **Pro Tools** y **FL Studio**. 
 
 Su núcleo tecnológico está impulsado por un motor inteligente de procesamiento digital de señales (DSP) en Python que alinea stems de audio mediante correlación de fase, traduce metadatos matemáticamente y **conforma sesiones automáticamente de forma remota** utilizando el SDK de Pro Tools (PTSL / gRPC).
 

@@ -19,11 +19,16 @@ fi
 
 # Instalar dependencias
 echo "Instalando dependencias (pywebview)..."
-python3 -m pip install pywebview --quiet
+python3 -m pip install pywebview --quiet --break-system-packages
 
 # Iniciar aplicación
-echo "[SISTEMA ACTIVO] El servidor esta corriendo en http://localhost:8000"
-echo "Manten esta ventana abierta mientras usas FreePTX."
-echo "Para salir, simplemente cierra esta terminal o presiona Ctrl+C."
-echo ""
-python3 app.py
+if [ -d "dist/FreePTX.app" ]; then
+    echo "[SISTEMA ACTIVO] Iniciando FreePTX.app..."
+    open dist/FreePTX.app
+else
+    echo "[SISTEMA ACTIVO] El servidor esta corriendo en http://localhost:8000"
+    echo "Manten esta ventana abierta mientras usas FreePTX."
+    echo "Para salir, simplemente cierra esta terminal o presiona Ctrl+C."
+    echo ""
+    python3 app.py
+fi

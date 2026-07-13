@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="FreePTX - Professional DAW Interoperability. Herramienta profesional de interoperabilidad entre Pro Tools y FL Studio.">
   <title>FreePTX | Professional DAW Interoperability</title>
+  <link rel="icon" type="image/png" href="icon.png">
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -20,6 +21,60 @@
         <div class="splash-loader-bar"></div>
       </div>
       <p class="splash-status">Inicializando módulos...</p>
+    </div>
+  </div>
+
+  <!-- Welcome Presentation Screen -->
+  <div class="welcome-presentation" id="welcomePresentation">
+    <div class="welcome-box-wrapper">
+      <div class="welcome-badge" id="changelogBtn" title="Ver historial de versiones">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        Novedad v2.1.0
+        <span style="margin-left:8px; opacity:0.6; font-size:10px;">▼</span>
+      </div>
+
+      <div class="welcome-content">
+        <div class="welcome-left">
+          <img src="logo.png" alt="FreePTX Logo" class="welcome-title-logo">
+          <p class="welcome-subtitle">La herramienta definitiva para la interoperabilidad profesional de DAWs. Experimenta la libertad de trabajar sin fronteras de plataforma.</p>
+        
+        <div class="welcome-features">
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </span>
+            <div class="feature-text"><strong>Alineación Automática</strong><br>Sincronización precisa de stems en segundos.</div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </span>
+            <div class="feature-text"><strong>Live Sync PTSL</strong><br>Conexión en caliente y directa con Pro Tools.</div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </span>
+            <div class="feature-text"><strong>Mezclador Inteligente</strong><br>Gain staging RMS automatizado para tus sesiones.</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="welcome-right">
+        <div class="banner-wrapper">
+          <img src="banner.png" alt="FreePTX Promotion Banner" class="welcome-banner">
+          <img src="stickerdad.png" alt="Sticker" class="welcome-sticker">
+        </div>
+      </div>
+    </div>
+
+      <button id="startWizardBtn" class="btn-primary welcome-btn">
+        Comenzar Proyecto
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px;">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -549,6 +604,26 @@
 
   </div><!-- /app-frame -->
 
+  <!-- Changelog Modal -->
+  <div class="changelog-overlay" id="changelogOverlay">
+    <div class="changelog-modal">
+      <div class="changelog-header">
+        <h2>Historial de Versiones</h2>
+        <button class="changelog-close" id="changelogClose">&times;</button>
+      </div>
+      <div class="changelog-body">
+        <div class="changelog-sidebar" id="changelogSidebar">
+           <!-- Loaded dynamically -->
+        </div>
+        <div class="changelog-detail" id="changelogDetail">
+          <div style="text-align: center; padding: 40px; color: #888; font-size: 14px;">
+            <div class="spinner"></div> Cargando...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notifications Container -->
   <div id="toast-container"></div>
 
@@ -574,6 +649,109 @@
           pct.textContent = v + '%';
         }
       }, 2000);
+      // Welcome Screen logic
+      const startWizardBtn = document.getElementById('startWizardBtn');
+      const welcomePresentation = document.getElementById('welcomePresentation');
+      if (startWizardBtn && welcomePresentation) {
+        startWizardBtn.addEventListener('click', () => {
+          welcomePresentation.classList.add('fade-out');
+          setTimeout(() => {
+            welcomePresentation.style.display = 'none';
+          }, 500);
+        });
+      }
+      // Changelog logic
+      const changelogBtn = document.getElementById('changelogBtn');
+      const changelogOverlay = document.getElementById('changelogOverlay');
+      const changelogClose = document.getElementById('changelogClose');
+      const changelogSidebar = document.getElementById('changelogSidebar');
+      const changelogDetail = document.getElementById('changelogDetail');
+      
+      let changelogLoaded = false;
+      
+      function renderMarkdownMasterDetail(md) {
+        const versions = md.split(/^## /m).filter(Boolean);
+        const data = [];
+        versions.forEach(ver => {
+          const lines = ver.trim().split('\n');
+          const titleLine = lines.shift().trim();
+          
+          let contentHtml = '<ul>';
+          lines.forEach(line => {
+            line = line.trim();
+            if(!line) return;
+            if(line.startsWith('* ')) {
+              let text = line.substring(2);
+              text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+              text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+              contentHtml += `<li>${text}</li>`;
+            } else if (line.startsWith('**') && line.endsWith('**')) {
+              let text = line.replace(/\*\*(.*?)\*\*/g, '$1');
+              contentHtml += `</ul><p class="md-subtitle">${text}</p><ul>`;
+            } else {
+              let text = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+              text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+              text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+              contentHtml += `</ul><p class="md-paragraph">${text}</p><ul>`;
+            }
+          });
+          contentHtml += '</ul>';
+          contentHtml = contentHtml.replace(/<ul>\s*<\/ul>/g, '');
+          data.push({ title: titleLine, html: contentHtml });
+        });
+        return data;
+      }
+
+      if (changelogBtn && changelogOverlay) {
+        changelogBtn.addEventListener('click', () => {
+          changelogOverlay.classList.add('active');
+          if (!changelogLoaded) {
+            fetch('CHANGELOG.md')
+              .then(res => res.text())
+              .then(text => {
+                const data = renderMarkdownMasterDetail(text);
+                changelogSidebar.innerHTML = '';
+                
+                data.forEach((v, idx) => {
+                  const btn = document.createElement('button');
+                  btn.className = 'changelog-nav-item' + (idx === 0 ? ' active' : '');
+                  btn.innerHTML = v.title;
+                  btn.addEventListener('click', () => {
+                    document.querySelectorAll('.changelog-nav-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    changelogDetail.innerHTML = `
+                      <div class="changelog-item fade-in-up">
+                        <h3>${v.title}</h3>
+                        ${v.html}
+                      </div>
+                    `;
+                  });
+                  changelogSidebar.appendChild(btn);
+                });
+                
+                if(data.length > 0) {
+                  changelogDetail.innerHTML = `
+                      <div class="changelog-item fade-in-up">
+                        <h3>${data[0].title}</h3>
+                        ${data[0].html}
+                      </div>
+                  `;
+                }
+                changelogLoaded = true;
+              })
+              .catch(err => {
+                changelogDetail.innerHTML = '<div style="color:red; text-align:center; padding:40px;">Error cargando el historial.</div>';
+              });
+          }
+        });
+        changelogClose.addEventListener('click', () => {
+          changelogOverlay.classList.remove('active');
+        });
+        changelogOverlay.addEventListener('click', (e) => {
+          if(e.target === changelogOverlay) changelogOverlay.classList.remove('active');
+        });
+      }
     });
   </script>
 </body>

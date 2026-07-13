@@ -3,6 +3,25 @@ import wave
 import struct
 import math
 import subprocess
+import array
+
+def _unpack_to_array(data, sampwidth):
+    if not data:
+        return array.array('f')
+    if sampwidth == 2:
+        shorts = array.array('h', data)
+        return array.array('f', (s / 32768.0 for s in shorts))
+    elif sampwidth == 3:
+        count = len(data) // 3
+        return array.array('f', (
+            int.from_bytes(data[j*3 : j*3+3], byteorder='little', signed=True) / 8388608.0
+            for j in range(count)
+        ))
+    elif sampwidth == 4:
+        ints = array.array('i', data)
+        return array.array('f', (v / 2147483648.0 for v in ints))
+    return array.array('f')
+
 
 def join_split_mono_files(left_path, right_path, output_path):
     with wave.open(left_path, 'rb') as w_l, wave.open(right_path, 'rb') as w_r:
@@ -32,13 +51,16 @@ def join_split_mono_files(left_path, right_path, output_path):
                 if not data_l or not data_r:
                     break
                     
-                interleaved = bytearray()
-                for idx in range(frames_to_read):
-                    offset = idx * sampwidth
-                    interleaved.extend(data_l[offset : offset + sampwidth])
-                    interleaved.extend(data_r[offset : offset + sampwidth])
+                interleaved = bytearray(len(data_l) + len(data_r))
+                view_out = memoryview(interleaved)
+                view_l = memoryview(data_l)
+                view_r = memoryview(data_r)
+                
+                for i in range(sampwidth):
+                    view_out[i::sampwidth*2] = view_l[i::sampwidth]
+                    view_out[i+sampwidth::sampwidth*2] = view_r[i::sampwidth]
                     
-                w_out.writeframes(bytes(interleaved))
+                w_out.writeframes(interleaved)
 
 
 def get_wav_rms(file_path):
@@ -64,25 +86,9 @@ def get_wav_rms(file_path):
                 if not data:
                     break
                     
-                floats = []
-                if sampwidth == 2:
-                    count = len(data) // 2
-                    shorts = struct.unpack(f"<{count}h", data[:count*2])
-                    floats = [s / 32768.0 for s in shorts]
-                elif sampwidth == 3:
-                    count = len(data) // 3
-                    for j in range(count):
-                        b = data[j*3 : j*3+3]
-                        val = int.from_bytes(b, byteorder='little', signed=True)
-                        floats.append(val / 8388608.0)
-                elif sampwidth == 4:
-                    count = len(data) // 4
-                    ints = struct.unpack(f"<{count}i", data[:count*4])
-                    floats = [v / 2147483648.0 for v in ints]
-                    
-                for f in floats:
-                    sum_squares += f * f
-                total_samples += len(floats)
+                arr = _unpack_to_array(data, sampwidth)
+                sum_squares += sum(x*x for x in arr)
+                total_samples += len(arr)
                 
             if total_samples == 0:
                 return -48.0
@@ -171,29 +177,12 @@ def get_wav_peaks(file_path, num_peaks=300):
                     peaks.append(0.0)
                     continue
                     
-                if sampwidth == 2:
-                    count = len(data) // 2
-                    shorts = struct.unpack(f"<{count}h", data[:count*2])
-                    val = max(abs(s) for s in shorts) if shorts else 0
-                    norm = val / 32768.0
-                elif sampwidth == 3:
-                    count = len(data) // 3
-                    max_abs = 0
-                    for j in range(count):
-                        b = data[j*3 : j*3+3]
-                        s_val = int.from_bytes(b, byteorder='little', signed=True)
-                        if abs(s_val) > max_abs:
-                            max_abs = abs(s_val)
-                    norm = max_abs / 8388608.0
-                elif sampwidth == 4:
-                    count = len(data) // 4
-                    ints = struct.unpack(f"<{count}i", data[:count*4])
-                    val = max(abs(v) for v in ints) if ints else 0
-                    norm = val / 2147483648.0
+                arr = _unpack_to_array(data, sampwidth)
+                if arr:
+                    val = max(abs(x) for x in arr)
+                    peaks.append(round(min(1.0, val), 3))
                 else:
-                    norm = 0.0
-                    
-                peaks.append(round(min(1.0, norm), 3))
+                    peaks.append(0.0)
             return peaks
     except Exception as e:
         return []
@@ -213,27 +202,13 @@ def resample_wav_file(input_path, output_path, target_sr):
             
         data = w_in.readframes(nframes)
         
-    floats = []
-    if sampwidth == 2:
-        count = len(data) // 2
-        shorts = struct.unpack(f"<{count}h", data[:count*2])
-        floats = [s / 32768.0 for s in shorts]
-    elif sampwidth == 3:
-        count = len(data) // 3
-        for j in range(count):
-            b = data[j*3 : j*3+3]
-            val = int.from_bytes(b, byteorder='little', signed=True)
-            floats.append(val / 8388608.0)
-    elif sampwidth == 4:
-        count = len(data) // 4
-        ints = struct.unpack(f"<{count}i", data[:count*4])
-        floats = [v / 2147483648.0 for v in ints]
-    else:
+    floats = _unpack_to_array(data, sampwidth)
+    if not floats:
         raise ValueError(f"Ancho de muestra WAV no soportado: {sampwidth} bytes.")
         
     ratio = target_sr / float(framerate)
     out_frames = int(nframes * ratio)
-    out_floats = [0.0] * (out_frames * nchannels)
+    out_floats = array.array('f', (0.0 for _ in range(out_frames * nchannels)))
     
     for c in range(nchannels):
         ch_samples = floats[c::nchannels]
@@ -247,12 +222,11 @@ def resample_wav_file(input_path, output_path, target_sr):
                 s1 = ch_samples[x1]
                 out_floats[j * nchannels + c] = (1.0 - alpha) * s0 + alpha * s1
                 
-    out_shorts = [int(max(-1.0, min(1.0, f)) * 32767) for f in out_floats]
-    out_data = struct.pack(f"<{len(out_shorts)}h", *out_shorts)
+    out_shorts = array.array('h', (int(max(-1.0, min(1.0, f)) * 32767) for f in out_floats))
     
     with wave.open(output_path, 'wb') as w_out:
         w_out.setparams((nchannels, 2, target_sr, out_frames, 'NONE', 'not compressed'))
-        w_out.writeframes(out_data)
+        w_out.writeframes(out_shorts.tobytes())
 
 
 def decode_wav_to_floats(filepath, max_samples=96000):
@@ -264,32 +238,20 @@ def decode_wav_to_floats(filepath, max_samples=96000):
         nframes = min(params.nframes, max_samples)
         
         if nframes == 0:
-            return [], framerate
+            return array.array('f'), framerate
             
         data = w.readframes(nframes)
         
-        floats = []
-        if sampwidth == 2:
-            count = len(data) // 2
-            shorts = struct.unpack(f"<{count}h", data[:count*2])
-            floats = [s / 32768.0 for s in shorts]
-        elif sampwidth == 3:
-            count = len(data) // 3
-            for j in range(count):
-                b = data[j*3 : j*3+3]
-                val = int.from_bytes(b, byteorder='little', signed=True)
-                floats.append(val / 8388608.0)
-        elif sampwidth == 4:
-            count = len(data) // 4
-            ints = struct.unpack(f"<{count}i", data[:count*4])
-            floats = [v / 2147483648.0 for v in ints]
-        else:
-            return [], framerate
+        floats = _unpack_to_array(data, sampwidth)
+        if not floats:
+            return array.array('f'), framerate
             
         if nchannels > 1:
-            mono = []
-            for i in range(0, len(floats), nchannels):
-                mono.append(sum(floats[i:i+nchannels]) / float(nchannels))
+            mono = array.array('f', (0.0 for _ in range(nframes)))
+            for c in range(nchannels):
+                ch = floats[c::nchannels]
+                for i in range(nframes):
+                    mono[i] += ch[i] / nchannels
             return mono, framerate
         return floats, framerate
 
@@ -312,8 +274,8 @@ def get_phase_correlation(file1_path, file2_path):
         mean1 = sum(y1) / float(n)
         mean2 = sum(y2) / float(n)
         
-        z1 = [x - mean1 for x in y1]
-        z2 = [x - mean2 for x in y2]
+        z1 = array.array('f', (x - mean1 for x in y1))
+        z2 = array.array('f', (x - mean2 for x in y2))
         
         num = sum(a * b for a, b in zip(z1, z2))
         den1 = sum(a * a for a in z1)
@@ -327,5 +289,6 @@ def get_phase_correlation(file1_path, file2_path):
     except Exception as e:
         print("Error checking phase:", str(e))
         return 0.0
+
 
 

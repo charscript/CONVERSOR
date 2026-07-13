@@ -3,18 +3,25 @@ import os
 import wave
 import struct
 import math
-from daw_sync import (
+
+from core.parsers import (
     parse_pt_session_text,
     timecode_to_seconds,
+    fuzzy_match_track
+)
+
+from core.midi import (
     write_midi_file,
-    pad_wav_file,
     encode_vlq,
+    write_reaper_project
+)
+
+from core.audio import (
+    pad_wav_file,
     get_wav_metadata,
     get_wav_peaks,
     resample_wav_file,
     get_phase_correlation,
-    write_reaper_project,
-    fuzzy_match_track,
     join_split_mono_files,
     get_wav_rms
 )

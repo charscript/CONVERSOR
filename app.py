@@ -570,7 +570,8 @@ class DAWSyncHandler(http.server.SimpleHTTPRequestHandler):
         if os.path.exists(config_path):
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
+                    loaded_conf = json.load(f)
+                    config.update(loaded_conf)
             except:
                 pass
                 

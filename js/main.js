@@ -1195,6 +1195,12 @@ async function checkPhaseCorrelation() {
 
 // UI Updating Engine
 function updateUI() {
+  // Safe fallbacks to prevent crashes
+  if (!state.config) state.config = {};
+  if (!state.config.markers) state.config.markers = [];
+  if (!state.config.tracks) state.config.tracks = [];
+  if (!state.config.notes) state.config.notes = [];
+
   if (state.detectedPt && state.detectedFlp) {
     syncStatusBadge.textContent = 'PT & FL Detectados';
     syncStatusBadge.className = 'daw-badge pt';
@@ -1223,7 +1229,7 @@ function updateUI() {
   let activeTimeSig = state.config.time_sig;
   let activeSampleRate = state.config.sample_rate || 48000.0;
   let activeBitDepth = state.config.bit_depth || '24-bit';
-  let activeMarkers = state.config.markers;
+  let activeMarkers = state.config.markers || [];
   
   if (state.detectedPt) {
     activeBpm = state.detectedPt.bpm || activeBpm;

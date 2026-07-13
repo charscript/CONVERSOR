@@ -7,6 +7,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -59,3 +62,36 @@ jobs:
         with:
           name: FreePTX-macOS
           path: dist/FreePTX.app/
+
+  release:
+    needs: [build-windows, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: FreePTX-Windows
+          path: FreePTX-Windows
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: FreePTX-macOS
+          path: FreePTX-macOS
+
+      - name: Zip Artifacts
+        run: |
+          cd FreePTX-Windows && zip -r ../FreePTX-Windows.zip . && cd ..
+          cd FreePTX-macOS && zip -r ../FreePTX-macOS.zip . && cd ..
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v2.1.0"
+          name: "FreePTX v2.1.0 (Auto Build)"
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: |
+            FreePTX-Windows.zip
+            FreePTX-macOS.zip

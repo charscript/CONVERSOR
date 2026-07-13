@@ -1,4 +1,20 @@
-## v2.1.0 <span>(Actual)</span>
+## v2.2.0 <span>(Actual)</span>
+
+**El Ecosistema Totalmente Automatizado**
+
+Con esta versión, FreePTX trasciende de ser solo un programa de escritorio a convertirse en una plataforma interconectada. Todo el ecosistema (Software y Web) ahora se comunica y actualiza de manera 100% autónoma gracias a la nueva arquitectura de integración continua y llamadas directas a la API de GitHub.
+
+**Sincronización Web y Actualizaciones Nativas**
+
+La nueva Web (Landing Page) ha sido inyectada con un sistema dinámico que lee en tiempo real el último "Release". Los botones de descarga ahora extraen mágicamente los binarios recién compilados sin intervención humana, y el registro de cambios (*Changelog*) se renderiza con un analizador Markdown integrado en la propia página web, luciendo el mismo *Glassmorphism* premium del resto de la web.
+
+Adicionalmente, hemos conectado los conductos de *feedback*: ahora puedes reportar errores directamente con un clic, generando tiquetes automáticos en nuestro panel central de GitHub.
+
+**Integración Continua CI/CD**
+
+Esta es la primera versión construida por robots. La compilación de los archivos para macOS y Windows ahora ocurre de forma desatendida en la nube (*GitHub Actions*). Con solo etiquetar la versión, nuestros servidores descargan dependencias, compilan ejecutables aislados y publican el parche globalmente en segundos.
+
+## v2.1.0
 
 **La Evolución del Diseño y Arquitectura Premium**
 

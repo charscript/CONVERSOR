@@ -1,5 +1,9 @@
 import Stepper from '../components/Layout/Stepper';
 import Step1Origin from './Steps/Step1Origin';
+import Step2Diagnosis from './Steps/Step2Diagnosis';
+import Step3Alignment from './Steps/Step3Alignment';
+import Step4Mixer from './Steps/Step4Mixer';
+import Step5Export from './Steps/Step5Export';
 import { useAppStore } from '../store/useAppStore';
 
 export default function WizardView() {
@@ -24,28 +28,20 @@ export default function WizardView() {
           <Step1Origin />
         </div>
         <div className={`transition-all duration-700 ease-smooth ${currentStep === 2 ? 'opacity-100 block animate-[wizard-slide-forward_0.7s_cubic-bezier(0.25,1,0.05,1)_forwards]' : 'hidden'}`}>
-          <div className="glass-panel p-6 text-center h-[300px] flex items-center justify-center">
-            <h2 className="text-xl text-ember font-display">Paso 2: Diagnóstico (En Construcción)</h2>
-          </div>
+          <Step2Diagnosis />
         </div>
         <div className={`transition-all duration-700 ease-smooth ${currentStep === 3 ? 'opacity-100 block animate-[wizard-slide-forward_0.7s_cubic-bezier(0.25,1,0.05,1)_forwards]' : 'hidden'}`}>
-          <div className="glass-panel p-6 text-center h-[300px] flex items-center justify-center">
-            <h2 className="text-xl text-fire font-display">Paso 3: Alineación (En Construcción)</h2>
-          </div>
+          <Step3Alignment />
         </div>
         <div className={`transition-all duration-700 ease-smooth ${currentStep === 4 ? 'opacity-100 block animate-[wizard-slide-forward_0.7s_cubic-bezier(0.25,1,0.05,1)_forwards]' : 'hidden'}`}>
-          <div className="glass-panel p-6 text-center h-[300px] flex items-center justify-center">
-            <h2 className="text-xl text-ember font-display">Paso 4: Mezcla (En Construcción)</h2>
-          </div>
+          <Step4Mixer />
         </div>
         <div className={`transition-all duration-700 ease-smooth ${currentStep === 5 ? 'opacity-100 block animate-[wizard-slide-forward_0.7s_cubic-bezier(0.25,1,0.05,1)_forwards]' : 'hidden'}`}>
-          <div className="glass-panel p-6 text-center h-[300px] flex items-center justify-center">
-            <h2 className="text-xl text-fire font-display">Paso 5: Exportación (En Construcción)</h2>
-          </div>
+          <Step5Export />
         </div>
       </div>
 
-      <div className="flex justify-between mt-5 bg-[#0a0505]/20 border border-white/5 rounded-lg p-3">
+      <div className="flex justify-between mt-5 bg-[#0a0505]/20 border border-white/5 rounded-lg p-3 backdrop-blur-[10px]">
         <button 
           className="btn-secondary"
           disabled={currentStep === 1}

@@ -8,8 +8,7 @@ import urllib.request
 import threading
 import re
 import subprocess
-import tkinter as tk
-from tkinter import filedialog
+import datetime
 try:
     import webview
 except ImportError:
@@ -50,15 +49,24 @@ PORT = get_free_port(8000)
 def choose_directory_crossplatform():
     """
     Spawns a native OS folder selector dialog.
-    Uses tkinter which is completely cross-platform.
+    Uses osascript on macOS and tkinter on other OS.
     """
     try:
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
-        path = filedialog.askdirectory(title="Selecciona la carpeta de tu sesión de audio:")
-        root.destroy()
-        return path if path else None
+        import sys
+        if sys.platform == 'darwin':
+            import subprocess
+            cmd = ['osascript', '-e', 'tell app "System Events" to POSIX path of (choose folder with prompt "Selecciona la carpeta de tu sesión de audio:")']
+            path = subprocess.check_output(cmd).decode('utf-8').strip()
+            return path if path else None
+        else:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            path = filedialog.askdirectory(title="Selecciona la carpeta de tu sesión de audio:")
+            root.destroy()
+            return path if path else None
     except Exception as e:
         print("Error displaying folder prompt:", str(e))
     return None
@@ -755,6 +763,13 @@ if __name__ == '__main__':
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         
     class HttpdHandler(DAWSyncHandler):
+        def __init__(self, *args, **kwargs):
+            dist_path = os.path.join(os.getcwd(), 'frontend', 'dist')
+            if os.path.exists(dist_path):
+                super().__init__(*args, directory=dist_path, **kwargs)
+            else:
+                super().__init__(*args, **kwargs)
+                
         def send_response(self, *args, **kwargs):
             super().send_response(*args, **kwargs)
             self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
@@ -779,8 +794,25 @@ if __name__ == '__main__':
     t.start()
     
     if webview:
-        webview.create_window('FreePTX - Professional DAW Interoperability', f'http://localhost:{PORT}', width=1400, height=900)
-        webview.start()
+        class Api:
+            def close(self):
+                webview.windows[0].destroy()
+            def minimize(self):
+                webview.windows[0].minimize()
+            def maximize(self):
+                webview.windows[0].toggle_fullscreen()
+                
+        try:
+            api = Api()
+            webview.create_window('FreePTX - Professional DAW Interoperability', f'http://localhost:{PORT}', width=1400, height=900, frameless=True, easy_drag=False, background_color='#0a0a0a', js_api=api)
+            webview.start()
+        except Exception as e:
+            print(f"[AVISO] pywebview fallo al iniciar la GUI: {e}. Ejecutando en modo consola.")
+            try:
+                while True:
+                    threading.Event().wait(3600)
+            except KeyboardInterrupt:
+                pass
     else:
         print("[AVISO] pywebview no esta instalado. Ejecutando en modo consola.")
         try:

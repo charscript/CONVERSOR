@@ -5,21 +5,24 @@ export default function Step1Origin() {
   const workspacePath = useAppStore(state => state.workspacePath);
   const setWorkspacePath = useAppStore(state => state.setWorkspacePath);
   const config = useAppStore(state => state.config);
+  const isLoading = useAppStore(state => state.isLoading);
+  const error = useAppStore(state => state.error);
+  const chooseDirectory = useAppStore(state => state.chooseDirectory);
+  const scanWorkspace = useAppStore(state => state.scanWorkspace);
   
   const handleScan = async () => {
-    // API logic will be implemented here
-    console.log("Scanning", workspacePath);
+    try {
+      await scanWorkspace();
+    } catch (err) {
+      console.error("Scan failed", err);
+    }
   };
 
   const chooseDir = async () => {
     try {
-      const res = await fetch('/api/choose-directory');
-      const data = await res.json();
-      if (data && data.path) {
-        setWorkspacePath(data.path);
-      }
+      await chooseDirectory();
     } catch (err) {
-      console.error(err);
+      console.error("Choose dir failed", err);
     }
   };
 
@@ -47,9 +50,9 @@ export default function Step1Origin() {
               value={workspacePath}
               onChange={(e) => setWorkspacePath(e.target.value)}
             />
-            <button onClick={handleScan} className="btn-primary">
-              <Search size={16} strokeWidth={2.5} />
-              Escanear
+            <button onClick={handleScan} disabled={isLoading || !workspacePath} className="btn-primary">
+              <Search size={16} strokeWidth={2.5} className={isLoading ? "animate-spin" : ""} />
+              {isLoading ? 'Escaneando...' : 'Escanear'}
             </button>
           </div>
         </div>

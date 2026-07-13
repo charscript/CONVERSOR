@@ -135,6 +135,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Event Listeners
 scanWorkspaceBtn.addEventListener('click', scanWorkspace);
+// Drag and Drop for Workspace
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+  welcomeScanPrompt.addEventListener(evt, preventDefaults, false);
+});
+function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+['dragenter', 'dragover'].forEach(evt => {
+  welcomeScanPrompt.addEventListener(evt, () => welcomeScanPrompt.classList.add('drag-active'), false);
+});
+['dragleave', 'drop'].forEach(evt => {
+  welcomeScanPrompt.addEventListener(evt, () => welcomeScanPrompt.classList.remove('drag-active'), false);
+});
+welcomeScanPrompt.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+  const dt = e.dataTransfer;
+  let path = '';
+  
+  if (dt.files && dt.files.length > 0) {
+    path = dt.files[0].path || '';
+  }
+  
+  if (!path) {
+    const textData = dt.getData('text');
+    if (textData && textData.trim().length > 0) {
+      path = textData.trim();
+      if (path.startsWith('file://')) path = decodeURI(path.replace('file://', ''));
+    }
+  }
+  
+  if (path) {
+    workspacePathInput.value = path;
+    scanWorkspace();
+  } else {
+    log('Tu sistema o navegador bloquea la lectura de la ruta arrastrada. Por favor usa el botón de la carpeta.', 'error');
+  }
+}
+
 chooseDirBtn.addEventListener('click', chooseWorkspaceDirectory);
 downloadMidiBtn.addEventListener('click', generateMidi);
 exportReaperBtn.addEventListener('click', exportReaperProject);
@@ -1813,10 +1851,11 @@ function renderStemAligner(targetSampleRate, targetBitDepth) {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </button>
         <input type="checkbox" class="align-checkbox" data-index="${index}" ${isMatched ? 'checked' : ''}>
-        <div style="display:flex; flex-direction:column; overflow:hidden;">
+        <div style="display:flex; flex-direction:column; overflow:hidden; width:100%;">
           <span class="file-name" id="${nameId}" title="Click para ver forma de onda">${basename} ${stBadge}</span>
           ${matchStr}
           ${diagnosticHtml}
+          <canvas id="waveform-canvas-${index}" class="waveform-canvas" width="600" height="48" style="display:none;"></canvas>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
@@ -1827,6 +1866,7 @@ function renderStemAligner(targetSampleRate, targetBitDepth) {
     `;
     
     audioFileList.appendChild(fileRow);
+    drawWaveformCanvas(`waveform-canvas-${index}`, filename);
     
     document.getElementById(playBtnId).addEventListener('click', () => toggleAudio(filename, playBtnId, index));
     document.getElementById(nameId).addEventListener('click', () => showWaveformVisualizer(filename, index));
@@ -1836,6 +1876,44 @@ function renderStemAligner(targetSampleRate, targetBitDepth) {
       resampleBtn.addEventListener('click', () => resampleAudioFile(filename, targetSampleRate));
     }
   });
+}
+
+// Function to fetch peaks and draw waveform canvas
+function drawWaveformCanvas(canvasId, filename) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  fetch('/api/audio/peaks?path=' + encodeURIComponent(state.workspacePath) + '&file=' + encodeURIComponent(filename))
+    .then(res => res.json())
+    .then(data => {
+      if (data.peaks && data.peaks.length > 0) {
+        canvas.style.display = 'block';
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const peaks = data.peaks;
+        const middle = canvas.height / 2;
+        const step = canvas.width / peaks.length;
+        
+        // Premium Fire Gradient for waveforms
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#ffaa00');
+        grad.addColorStop(0.5, '#ff2d2d');
+        grad.addColorStop(1, '#ffaa00');
+        ctx.fillStyle = grad;
+        
+        for(let i=0; i<peaks.length; i++) {
+          const x = i * step;
+          // Scale peaks (assuming peaks are normalized 0-1)
+          const h = Math.max(1, (peaks[i] / 1.0) * (middle - 2)); 
+          const y = middle - h;
+          ctx.beginPath();
+          ctx.roundRect(x, y, Math.max(1, step - 0.5), h * 2, 2);
+          ctx.fill();
+        }
+      }
+    })
+    .catch(err => console.error('Error fetching peaks for canvas', err));
 }
 
 // Fuzzy matching JS implementation helper

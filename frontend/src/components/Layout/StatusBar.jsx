@@ -46,7 +46,7 @@ export default function StatusBar() {
         </span>
         
         <span className="w-[1px] h-[14px] bg-white/5"></span>
-        <span className="text-fire/40 text-[10px] font-semibold">v2.1.0</span>
+        <span className="text-fire/40 text-[10px] font-semibold">v2.3.0</span>
       </div>
     </footer>
   );

@@ -45,7 +45,7 @@ def get_free_port(starting_port=8000):
     return starting_port
 
 PORT = get_free_port(8000)
-APP_VERSION = "v2.2.0"
+APP_VERSION = "v2.3.0"
 
 def choose_directory_crossplatform():
     """

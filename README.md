@@ -6,7 +6,7 @@ Su núcleo tecnológico está impulsado por un motor inteligente de procesamient
 
 ---
 
-## 🚀 El Ecosistema Autónomo (v2.2.0+)
+## 🚀 El Ecosistema Autónomo (v2.3.0+)
 
 FreePTX no es solo un programa de escritorio, es un ecosistema interconectado con mantenimiento automatizado:
 
@@ -32,7 +32,7 @@ Ya no necesitas configurar engorrosos entornos virtuales para publicar actualiza
 
 ### ¿Cómo Publicar una Nueva Versión? (CI/CD Automático)
 1. Escribe tu nuevo código y realiza tu *Commit* habitual (`git commit -m "nuevas funciones"`).
-2. Crea una "Etiqueta" (Tag) especificando el número de la versión. **Asegúrate de que empiece con una "v"** (ejemplo: `v2.2.0`). Puedes hacer esto desde tu terminal con `git tag v2.2.0` o desde la pestaña "History" en GitHub Desktop.
+2. Crea una "Etiqueta" (Tag) especificando el número de la versión. **Asegúrate de que empiece con una "v"** (ejemplo: `v2.3.0`). Puedes hacer esto desde tu terminal con `git tag v2.3.0` o desde la pestaña "History" en GitHub Desktop.
 3. Envía los cambios (`git push origin main --tags`).
 
 **¡Eso es todo!** Automáticamente, nuestros servidores en GitHub Actions iniciarán un *Workflow*. Descargarán las dependencias, compilarán el `.exe` para Windows y la aplicación `.app` para macOS, crearán el "Release" en tu repositorio y subirán los archivos. Acto seguido, la Landing Page y la App reconocerán inmediatamente la nueva actualización.

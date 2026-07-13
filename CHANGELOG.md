@@ -1,4 +1,18 @@
-## v2.2.0 <span>(Actual)</span>
+## v2.3.0 <span>(Actual)</span>
+
+**Separación del Repositorio y Hosting Autónomo**
+
+Hemos desacoplado por completo la página web de aterrizaje (*Landing Page*) del repositorio principal del código del software. Esto mantiene el entorno de desarrollo limpio, seguro y enfocado exclusivamente en la aplicación, permitiendo alojar la web de forma independiente en su propio servicio.
+
+**Bypass Dinámico del Changelog**
+
+Resolvimos las demoras de actualización en la página de descargas. Ahora, la Landing Page hace un bypass inteligente y lee el archivo `CHANGELOG.md` crudo directamente desde el código fuente del repositorio en GitHub, garantizando que siempre veas las notas de versión más detalladas e inmediatas sin importar el estado del caché del Release.
+
+**Ajustes de Diseño Web y Permisos CI/CD**
+
+Refinamos los estilos del pie de página para eliminar espacios muertos y centramos ópticamente la botonera superior de descarga. Además, inyectamos permisos explícitos de escritura en nuestro robot de *GitHub Actions*, solucionando permanentemente el error 403 Forbidden para que los lanzamientos se suban automáticamente y sin intervención humana.
+
+## v2.2.0
 
 **El Ecosistema Totalmente Automatizado**
 

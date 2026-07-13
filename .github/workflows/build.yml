@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -29,7 +29,7 @@ jobs:
           pyinstaller --noconfirm --onedir --noconsole --name "FreePTX" --add-data "index.html;." --add-data "styles.css;." --add-data "js;js" --add-data "logo.png;." app.py
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: FreePTX-Windows
           path: dist/FreePTX/
@@ -38,7 +38,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -55,7 +55,7 @@ jobs:
           pyinstaller --noconfirm --onedir --windowed --name "FreePTX" --add-data "index.html:." --add-data "styles.css:." --add-data "js:js" --add-data "logo.png:." app.py
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: FreePTX-macOS
           path: dist/FreePTX.app/

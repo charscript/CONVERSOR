@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FreePTX - Professional DAW Interoperability. Herramienta profesional de interoperabilidad entre Pro Tools y FL Studio.">
+  <title>FreePTX | Professional DAW Interoperability</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Splash Loading Screen -->
+  <div class="splash-screen" id="splashScreen">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <img src="logo.png" alt="FreePTX Logo" style="max-height: 280px; width: auto; object-fit: contain; margin-bottom: 20px;">
+      </div>
+      <div class="splash-loader">
+        <div class="splash-loader-bar"></div>
+      </div>
+      <p class="splash-status">Inicializando módulos...</p>
+    </div>
+  </div>
+
+  <!-- Fire Particles Overlay -->
+  <div class="fire-particles" aria-hidden="true">
+    <div class="ember"></div>
+    <div class="ember"></div>
+    <div class="ember"></div>
+    <div class="ember"></div>
+    <div class="ember"></div>
+    <div class="ember"></div>
+    <div class="ember"></div>
+    <div class="ember"></div>
+  </div>
+
+  <!-- macOS Window Title Bar -->
+  <div class="window-titlebar">
+    <div class="titlebar-traffic-lights">
+      <span class="tl-btn tl-close" title="Cerrar"></span>
+      <span class="tl-btn tl-minimize" title="Minimizar"></span>
+      <span class="tl-btn tl-maximize" title="Maximizar"></span>
+    </div>
+    <div class="titlebar-title">
+      <svg viewBox="0 0 24 24" width="12" height="12" style="fill: var(--accent-fire); margin-right: 6px;"><path d="M13.5 0.67s0.74 2.65 0.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l0.03-0.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5 0.67z"/></svg>
+      FreePTX v2.1.0 — Professional DAW Interoperability
+    </div>
+    <div class="titlebar-spacer"></div>
+  </div>
+
+  <!-- App Frame Container -->
+  <div class="app-frame">
+
+  <!-- App Header -->
+  <header>
+    <div class="logo-container">
+      <img src="logo.png" alt="FreePTX Logo" style="max-height: 50px; width: auto; object-fit: contain; transform: scale(2.2); transform-origin: left center; margin-left: 20px;">
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <!-- Expert View Toggle Switch -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; white-space: nowrap;">Vista Experta</span>
+        <label class="switch">
+          <input type="checkbox" id="expertModeToggle">
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Container -->
+  <main class="container" id="mainGridContainer">
+    
+    <!-- STEPPER PROGRESS BAR -->
+    <div class="stepper-container" id="wizardStepper" style="grid-column: 1 / -1; display: flex;">
+      <div class="step-item active" data-step="1" id="stepIndicator1">
+        <span class="step-num">1</span>
+        <span class="step-label">Origen</span>
+      </div>
+      <div class="step-line" id="stepLine1"></div>
+      <div class="step-item" data-step="2" id="stepIndicator2">
+        <span class="step-num">2</span>
+        <span class="step-label">Diagnóstico</span>
+      </div>
+      <div class="step-line" id="stepLine2"></div>
+      <div class="step-item" data-step="3" id="stepIndicator3">
+        <span class="step-num">3</span>
+        <span class="step-label">Alineación</span>
+      </div>
+      <div class="step-line" id="stepLine3"></div>
+      <div class="step-item" data-step="4" id="stepIndicator4">
+        <span class="step-num">4</span>
+        <span class="step-label">Mezcla</span>
+      </div>
+      <div class="step-line" id="stepLine4"></div>
+      <div class="step-item" data-step="5" id="stepIndicator5">
+        <span class="step-num">5</span>
+        <span class="step-label">Exportación</span>
+      </div>
+    </div>
+    
+    <!-- LEFT COLUMN: Timeline, Stems, Markers -->
+    <section id="leftColumnSection">
+      
+      <!-- Left Column View Tabs (Expert Mode toggle targets) -->
+      <div class="tab-container" style="display: none; margin-bottom: 15px;">
+        <button id="alignTabBtn" class="tab-btn active">Alineador de Stems</button>
+        <button id="mixerTabBtn" class="tab-btn">Mezclador Rápido</button>
+      </div>
+      
+      <!-- PASO 1: ORIGEN (Importación y Escaneo) -->
+      <div id="step1View" class="step-view">
+        <div class="panel" style="padding: 25px;">
+          <h2 style="font-size: 20px; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <span>📁</span> Paso 1: Origen de la Sesión
+          </h2>
+          
+          <div id="welcomeScanPrompt" style="background: rgba(0, 0, 0, 0.25); border: 1px dashed var(--border-light); border-radius: 8px; padding: 30px; text-align: center; margin-bottom: 20px;">
+            <span style="font-size: 40px; display: block; margin-bottom: 12px;">🔍</span>
+            <span style="color: var(--text-muted); font-size: 14px; display: block; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">Selecciona la carpeta local de tu proyecto utilizando el buscador. El sistema escaneará el directorio buscando stems de audio, archivos FLP de FL Studio y reportes de metadatos de Pro Tools.</span>
+            
+            <div class="workspace-input-container" style="justify-content: center; margin-top: 15px;">
+              <button id="chooseDirBtn" class="btn-secondary" style="padding: 10px 14px; font-size: 16px; min-width: 44px; display: flex; align-items: center; justify-content: center; height: 38px;" title="Buscar Carpeta en Finder">
+                📁
+              </button>
+              <input type="text" id="workspacePathInput" class="input-glow" placeholder="Ruta local del proyecto..." value="" style="min-width: 250px;">
+              <button id="scanWorkspaceBtn" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                Escanear
+              </button>
+            </div>
+          </div>
+          
+          <!-- Session Summary Panel (hidden in Step 1 until scanned) -->
+          <div id="step1SummaryCard" style="display: none;">
+            <div class="session-summary-grid" style="margin-bottom: 20px;">
+              <div class="metric-card">
+                <div class="metric-label">Tempo del Proyecto</div>
+                <div class="metric-value cyan" id="summaryBpm">-- BPM</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Escala / Tonalidad</div>
+                <div class="metric-value" id="summaryKey">--</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Métrica (Compás)</div>
+                <div class="metric-value violet" id="summaryTimeSig">--</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Marcadores</div>
+                <div class="metric-value" id="summaryMarkersCount">0</div>
+              </div>
+            </div>
+            
+            <div style="background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px; padding: 15px; margin-top: 15px;">
+              <span style="color: #00ff66; font-weight: 700; font-size: 13px; display: block; margin-bottom: 4px;">✅ ¡Escanéo Exitoso!</span>
+              <p style="font-size: 13px; margin: 0; color: var(--text-muted);" id="step1DetectionSummary">
+                Hemos cargado los metadatos de la sesión de audio correctamente. Haz clic en Siguiente para analizar los archivos WAV.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- PASO 2: DIAGNÓSTICO (Compatibilidad y Fase) -->
+      <div id="step2View" class="step-view" style="display: none;">
+        <div class="panel" id="stemAlignerPanel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              Paso 2: Diagnóstico & Consolidación de Stems
+            </div>
+            <button id="batchResampleBtn" class="btn-secondary" style="font-size: 11px; padding: 4px 10px; border-color: rgba(255, 170, 0, 0.3); color: #ffaa00; background: rgba(255, 170, 0, 0.08); display: none; cursor: pointer;">
+              🔄 Remuestrear Mismatches
+            </button>
+          </div>
+          
+          <div class="daw-instructions">
+            Revisa incompatibilidades de frecuencia de muestreo. Los stems Split-Mono (.L / .R) han sido consolidados automáticamente a estéreo interleaved [ST].
+          </div>
+          
+          <div class="file-list" id="audioFileList">
+            <div style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 15px 0;">
+              No se han escaneado archivos WAV.
+            </div>
+          </div>
+
+          <!-- Phase Correlation Diagnostics Widget -->
+          <div class="phase-widget" style="margin-top: 20px;">
+            <span style="font-size: 13px; font-weight: 600; color: var(--accent-cyan); display: block; margin-bottom: 8px;">Diagnóstico de Correlación de Fase</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="phaseFile1" class="input-glow" style="flex-grow: 1; padding: 6px 10px; font-size: 12px;">
+                <option value="">-- Pista 1 --</option>
+              </select>
+              <span style="color: var(--text-muted); font-size: 12px;">y</span>
+              <select id="phaseFile2" class="input-glow" style="flex-grow: 1; padding: 6px 10px; font-size: 12px;">
+                <option value="">-- Pista 2 --</option>
+              </select>
+              <button id="checkPhaseBtn" class="btn-secondary" style="padding: 6px 14px; font-size: 12px;">Analizar</button>
+            </div>
+            <div class="phase-gauge-container">
+              <span style="font-size: 10px; color: var(--accent-pink); font-weight: 700;">-1.0 (Cancelado)</span>
+              <div class="phase-gauge">
+                <div id="phasePointer" class="phase-gauge-pointer"></div>
+              </div>
+              <span style="font-size: 10px; color: var(--accent-cyan); font-weight: 700;">+1.0 (En Fase)</span>
+            </div>
+            <div id="phaseResultLabel" style="font-size: 11px; text-align: center; margin-top: 8px; color: var(--text-muted);">
+              Selecciona dos pistas para calcular la compatibilidad de fase.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- PASO 3: ALINEACIÓN (Línea de Tiempo y Offsets) -->
+      <div id="step3View" class="step-view" style="display: none;">
+        <!-- Visual Timeline Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
+              Paso 3: Alineación Temporal (Línea de Tiempo)
+            </div>
+          </div>
+          
+          <div class="timeline-container" style="margin-bottom: 20px;">
+            <div class="timeline-header-ticks" id="timelineTicks">
+              <span>Inicio (Barra 1)</span>
+              <span>20s</span>
+              <span>40s</span>
+              <span>60s</span>
+              <span>80s</span>
+              <span>Fin</span>
+            </div>
+            <div class="timeline-track-list" id="timelineTracks">
+              <div style="text-align: center; color: var(--text-muted); padding: 20px 0; font-size: 13px;">
+                Ingresa una ruta de directorio y escanea para visualizar la línea de tiempo.
+              </div>
+            </div>
+            <div class="timeline-markers-bar" id="timelineMarkers" title="Doble clic en esta barra para añadir un marcador en caliente">
+              <!-- Dynamic markers go here -->
+            </div>
+          </div>
+          
+          <!-- Waveform visualizer card (hidden until track is selected) -->
+          <div id="waveformVisualizer" class="waveform-container" style="margin-bottom: 20px;">
+            <div class="waveform-header">
+              <span id="waveformTitle" style="color: var(--accent-cyan);">Visualizador de Onda</span>
+              <span id="waveformInfo">0.00s</span>
+            </div>
+            <canvas id="waveformCanvas" class="waveform-canvas" width="600" height="90"></canvas>
+            <div class="waveform-slider-container">
+              <span style="min-width: 90px;">Desfase Manual:</span>
+              <input type="range" id="waveformOffsetSlider" class="waveform-slider" min="0" max="30" step="0.001" value="0">
+              <span id="waveformSliderValue" style="font-family: monospace; min-width: 60px; text-align: right;">0.000s</span>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 12px; margin-bottom: 25px;">
+            <button id="alignAllBtn" class="btn-primary" style="flex-grow: 2; justify-content: center;" disabled>
+              Alinear Stems Seleccionados
+            </button>
+            <button id="zipStemsBtn" class="btn-secondary" style="flex-grow: 1; justify-content: center;" disabled>
+              Empaquetar Stems (ZIP)
+            </button>
+          </div>
+          
+          <!-- Markers List Inside Step 3 -->
+          <div style="border-top: 1px solid var(--border-light); padding-top: 20px;">
+            <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--accent-cyan);">Marcadores Temporales de la Sesión</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.01); padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); align-items: center;">
+              <input type="text" id="newMarkerName" class="input-glow" placeholder="Nombre" style="width: 120px; padding: 6px 10px; font-size: 11px;">
+              <input type="text" id="newMarkerLocation" class="input-glow" placeholder="Posición (s)" style="width: 120px; padding: 6px 10px; font-size: 11px;">
+              <input type="text" id="newMarkerComments" class="input-glow" placeholder="Notas (opcional)" style="flex-grow: 1; padding: 6px 10px; font-size: 11px;">
+              <button id="addMarkerFormBtn" class="btn-primary" style="padding: 6px 12px; font-size: 11px;">Añadir</button>
+            </div>
+            
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Posición</th>
+                    <th>Tiempo (s)</th>
+                    <th>Nombre</th>
+                    <th>Notas / Comentarios</th>
+                    <th style="width: 60px; text-align: center;">Borrar</th>
+                  </tr>
+                </thead>
+                <tbody id="markersTableBody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                      No hay marcadores cargados.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- PASO 4: MEZCLA VIRTUAL Y HEADROOM (Faders & Gain Staging) -->
+      <div id="step4View" class="step-view" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><path d="M3 17h18v2H3zm0-7h18v2H3zm0-7h18v2H3z"/></svg>
+              Paso 4: Mezcla Virtual & Gain Staging
+            </div>
+          </div>
+          
+          <div class="daw-instructions">
+            Utiliza las recomendaciones de <strong>Gain Stage</strong> RMS calculadas en segundo plano para nivelar la sonoridad de los canales. Configura el balance (Pan) y el volumen antes de exportar.
+          </div>
+          
+          <div id="mixerView" class="mixer-panel" style="display: flex; margin-bottom: 25px;">
+            <!-- Dynamic mixer channels loaded by main.js -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- PASO 5: EXPORTACIÓN Y DESTINO (Live PTSL, RPP, MIDI) -->
+      <div id="step5View" class="step-view" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24"><path d="M17 16h-4v-4h4v4zm0-6h-4V6h4v4zm-6 6H7v-4h4v4zm0-6H7V6h4v4zm-6 6H1v-4h4v4zm0-6H1V6h4v4z"/></svg>
+              Paso 5: Destino & Generación de Sesiones
+            </div>
+          </div>
+          
+          <div class="daw-instructions">
+            Genera los archivos finales compatibles con tu DAW de destino o sincroniza directamente en vivo.
+          </div>
+          
+          <div class="bridge-tools-grid">
+            <!-- Pro Tools Section -->
+            <div class="daw-box pt-side">
+              <div class="daw-box-header" style="justify-content: space-between; width: 100%;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span class="daw-badge pt">Pro Tools</span>
+                  <span id="ptslBadge" class="ptsl-badge disconnected" title="Conexión en Vivo Pro Tools Scripting SDK (PTSL)">PTSL</span>
+                </div>
+                <h3 style="font-size: 14px;">Importar/Conformar</h3>
+              </div>
+              <p class="daw-instructions">
+                Carga marcadores y automatizaciones. O utiliza la sincronización en vivo para montar la sesión en caliente.
+              </p>
+              
+              <div id="ptInfoArea" style="margin-bottom: 15px; font-size: 13px;">
+                <span style="color: var(--text-muted);">Sin datos detectados de Pro Tools.</span>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; width: 100%;">
+                <button id="downloadMidiBtn" class="btn-primary" style="width: 100%; justify-content: center;" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                  </svg>
+                  Generar MIDI de Tempo & Marcadores
+                </button>
+                <button id="buildPtSessionBtn" class="btn-secondary" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px; border-color: rgba(0, 255, 102, 0.2); color: #00ff66; background: rgba(0, 255, 102, 0.04);" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  Construir Sesión en Pro Tools (Live)
+                </button>
+              </div>
+            </div>
+            
+            <!-- FL Studio / Reaper Section -->
+            <div class="daw-box fl-side">
+              <div class="daw-box-header">
+                <span class="daw-badge fl">FL Studio / Reaper</span>
+                <h3 style="font-size: 14px;">Exportar Sesiones</h3>
+              </div>
+              <p class="daw-instructions">
+                Genera proyectos formateados con colores, carpetas y mapeo de plugins equivalentes.
+              </p>
+              
+              <div id="flInfoArea" style="margin-bottom: 15px; font-size: 13px;">
+                <span style="color: var(--text-muted);">Sin datos detectados de FL Studio.</span>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; width: 100%;">
+                <button id="exportReaperBtn" class="btn-secondary" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px;" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/>
+                  </svg>
+                  Exportar Sesión a Reaper (.RPP)
+                </button>
+                <button id="importFlpDataBtn" class="btn-secondary" style="width: 100%;" disabled>
+                  Sincronizar Datos desde FLP
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- WIZARD STEP NAVIGATION FOOTER -->
+      <div class="wizard-footer-nav" id="wizardNavControls">
+        <button id="prevStepBtn" class="btn-secondary">⬅️ Anterior</button>
+        <button id="nextStepBtn" class="btn-primary">Siguiente ➡️</button>
+      </div>
+      
+    </section>
+
+    <!-- RIGHT COLUMN: Notes, Scales & Activity Logs (Shown by default in expert mode, contextually adjusted in wizard) -->
+    <aside id="rightColumnAside">
+      
+      <!-- Musical Theory & Scale Helper Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            Teoría Musical & Escalas
+          </div>
+        </div>
+        <div class="scale-helper-container">
+          <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+            <span style="font-weight: 500;">Escala del Proyecto:</span>
+            <span style="font-weight: 700; color: var(--accent-cyan);" id="scaleProjectKey">C Minor</span>
+          </div>
+          <div style="margin-top: 4px;">
+            <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 4px;">Notas en la escala:</div>
+            <div class="scale-key-notes" id="scaleKeyNotes">C, D, Eb, F, G, Ab, Bb</div>
+          </div>
+          
+          <div style="border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px;">
+            <div style="font-weight: 500; margin-bottom: 6px;">Calculadora de Transposición:</div>
+            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px;">
+              <span style="color: var(--text-muted); font-size: 11px;">Tono Original:</span>
+              <select id="originalScaleSelect" class="input-glow" style="width: auto; padding: 4px 8px; font-size: 11px; flex-grow: 1;">
+                <option value="C">C / Do</option>
+                <option value="C#">C# / Do#</option>
+                <option value="D">D / Re</option>
+                <option value="D#">D# / Re#</option>
+                <option value="E">E / Mi</option>
+                <option value="F">F / Fa</option>
+                <option value="F#">F# / Fa#</option>
+                <option value="G">G / Sol</option>
+                <option value="G#">G# / Sol#</option>
+                <option value="A">A / La</option>
+                <option value="A#">A# / La#</option>
+                <option value="B">B / Si</option>
+              </select>
+              <select id="originalModeSelect" class="input-glow" style="width: auto; padding: 4px 8px; font-size: 11px;">
+                <option value="Minor">Menor</option>
+                <option value="Major">Mayor</option>
+              </select>
+            </div>
+            
+            <div id="transpositionResult" style="background: rgba(255, 170, 0, 0.08); border: 1px solid rgba(255,170,0,0.2); padding: 8px; border-radius: 6px; text-align: center; color: #ffaa00; font-weight: 600; font-size: 12px; margin-top: 8px;">
+              Pitch shift requerido: 0 semitonos
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 8px;">
+            <div style="font-weight: 500; margin-bottom: 6px;">Explorador de Escala (Teclado):</div>
+            <div class="piano-container" id="pianoKeyboard">
+              <!-- Keys loaded dynamically in JS -->
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 6px;">
+              Resaltado: Celeste (Escala Mayor), Violeta (Escala Menor)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collaborative Project Notes -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V5h12v2H6zm0 4h12v2H6v-2zm0-8h12v2H6V5z"/></svg>
+            Notas de Colaboración
+          </div>
+        </div>
+        
+        <div class="notes-container" id="notesList">
+          <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 0;">
+            No hay notas registradas para este proyecto.
+          </div>
+        </div>
+        
+        <div class="note-input-area" style="flex-direction: column; gap: 8px;">
+          <textarea id="newNoteText" placeholder="Escribe un comentario o revisión..."></textarea>
+          
+          <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span style="font-size: 11px; color: var(--text-muted);">Vincular a:</span>
+              <select id="noteMarkerSelect" class="input-glow" style="width: 100px; padding: 4px 8px; font-size: 11px; width: auto; max-width: 120px;">
+                <option value="">(Ninguno)</option>
+              </select>
+              <input type="text" id="noteTimeInput" class="input-glow" placeholder="Tiempo (s)" style="width: 65px; padding: 4px 8px; font-size: 11px;">
+            </div>
+            
+            <button id="addNoteBtn" class="btn-primary" style="padding: 6px 14px; font-size: 12px;">Enviar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Console / Activity Logs -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4v-9h4v9z"/></svg>
+            Registro de Actividad
+          </div>
+        </div>
+        
+        <div class="status-log" id="statusLogConsole">
+          <div class="log-entry">
+            <span class="log-time">[00:00:00]</span>
+            <span>Sistema iniciado. Esperando escaneo de directorio.</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+    <!-- Bottom Status Bar -->
+    <footer class="app-statusbar">
+      <div class="statusbar-left">
+        <span class="statusbar-text"><kbd>⌘</kbd>+<kbd>S</kbd> Escanear</span>
+        <span class="statusbar-divider"></span>
+        <span class="statusbar-text"><kbd>⌘</kbd>+<kbd>E</kbd> Exportar</span>
+      </div>
+      <div class="statusbar-right">
+        <span class="statusbar-chip" id="sampleRateChip">48kHz / 24bit</span>
+        <span class="statusbar-divider"></span>
+        <span class="statusbar-chip">Buffer: 512</span>
+        <span class="statusbar-divider"></span>
+        <span class="statusbar-cpu">
+          <span class="cpu-label">CPU</span>
+          <span class="cpu-bar"><span class="cpu-fill" id="cpuFill" style="width: 12%;"></span></span>
+          <span class="cpu-pct" id="cpuPct">12%</span>
+        </span>
+        <span class="statusbar-divider"></span>
+        <span class="statusbar-text statusbar-version">v2.1.0</span>
+      </div>
+    </footer>
+
+  </div><!-- /app-frame -->
+
+  <!-- Toast Notifications Container -->
+  <div id="toast-container"></div>
+
+  <!-- Load script -->
+  <script type="module" src="js/main.js"></script>
+  <script>
+    // Splash screen auto-dismiss
+    window.addEventListener('load', () => {
+      const splash = document.getElementById('splashScreen');
+      if (splash) {
+        setTimeout(() => {
+          splash.classList.add('fade-out');
+          setTimeout(() => splash.remove(), 600);
+        }, 1800);
+      }
+      // Fake CPU meter animation
+      setInterval(() => {
+        const fill = document.getElementById('cpuFill');
+        const pct = document.getElementById('cpuPct');
+        if (fill && pct) {
+          const v = Math.floor(8 + Math.random() * 18);
+          fill.style.width = v + '%';
+          pct.textContent = v + '%';
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

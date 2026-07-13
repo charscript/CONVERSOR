@@ -1,0 +1,61 @@
+name: Build and Release FreePTX
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview
+
+      - name: Build Windows Executable
+        run: |
+          pyinstaller --noconfirm --onedir --noconsole --name "FreePTX" --add-data "index.html;." --add-data "styles.css;." --add-data "js;js" --add-data "logo.png;." app.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: FreePTX-Windows
+          path: dist/FreePTX/
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview
+
+      - name: Build macOS App
+        run: |
+          pyinstaller --noconfirm --onedir --windowed --name "FreePTX" --add-data "index.html:." --add-data "styles.css:." --add-data "js:js" --add-data "logo.png:." app.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: FreePTX-macOS
+          path: dist/FreePTX.app/
